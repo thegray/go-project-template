@@ -9,9 +9,11 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
 
 
 ## Project Structure 
+```text
 /myapp  
     ├── cmd/  
-    │    └── server/main.go        // App entry point & dependency injection (wiring)  
+    │    └── server/
+    |         └── main.go        // App entry point & dependency injection (wiring)  
     ├── internal/  
     │    ├── domain/               // Shared DTOs and Entities (prevents circular deps)  
     │    │    ├── user.go  
@@ -27,6 +29,7 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
     └── api/                        // Transport layer (REST Handlers, gRPC, Middleware)  
          └── rest/  
                └── user_handler.go   // Orchestrates calls between domain services  
+```
 
 
 ## Key Design Rules
