@@ -9,24 +9,24 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
 
 
 ## Project Structure 
-/myapp
-  ├── cmd/
-  │    └── server/main.go        // App entry point & dependency injection (wiring)
-  ├── internal/
-  │    ├── domain/               // Shared DTOs and Entities (prevents circular deps)
-  │    │    ├── user.go
-  │    │    └── order.go
-  │    ├── user/                 // Domain-specific package
-  │    │    ├── service.go       // Core business logic (Concrete Structs)
-  │    │    ├── service_test.go 
-  │    │    ├── ports.go         // Requirements defined as Interfaces
-  │    │    └── repository/      // Infrastructure implementations (Postgres, Mock, etc.)
-  │    │         └── pg.go
-  │    └── order/              
-  ├── pkg/                       // Reusable library code (Logger, Auth, Crypto)
-  └── api/                       // Transport layer (REST Handlers, gRPC, Middleware)
-       └── rest/
-            └── user_handler.go  // Orchestrates calls between domain services
+/myapp  
+  ├── cmd/  
+  │    └── server/main.go        // App entry point & dependency injection (wiring)  
+  ├── internal/  
+  │    ├── domain/               // Shared DTOs and Entities (prevents circular deps)  
+  │    │    ├── user.go  
+  │    │    └── order.go  
+  │    ├── user/                 // Domain-specific package  
+  │    │    ├── service.go       // Core business logic (Concrete Structs)  
+  │    │    ├── service_test.go  
+  │    │    ├── ports.go         // Requirements defined as Interfaces  
+  │    │    └── repository/      // Infrastructure implementations (Postgres, Mock, etc.)  
+  │    │         └── pg.go  
+  │    └── order/  
+  ├── pkg/                       // Reusable library code (Logger, Auth, Crypto)  
+  └── api/                       // Transport layer (REST Handlers, gRPC, Middleware)  
+       └── rest/  
+            └── user_handler.go  // Orchestrates calls between domain services  
 
 
 ## Key Design Rules
