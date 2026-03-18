@@ -10,26 +10,6 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
 
 ## Project Structure 
 ```text
-/myapp  
-    ├── cmd/  
-    │    └── server/
-    |         └── main.go        // App entry point & dependency injection (wiring)  
-    ├── internal/  
-    │    ├── domain/               // Shared DTOs and Entities (prevents circular deps)  
-    │    │    ├── user.go  
-    │    │    └── order.go  
-    │    ├── user/                 // Domain-specific package  
-    │    │    ├── service.go        // Core business logic (Concrete Structs)  
-    │    │    ├── service_test.go  
-    │    │    ├── ports.go          // Requirements defined as Interfaces  
-    │    │    └── repository/       // Infrastructure implementations (Postgres, Mock, etc.)  
-    │    │        └── pg.go  
-    │    └── order/  
-    ├── pkg/                        // Reusable library code (Logger, Auth, Crypto)  
-    └── api/                        // Transport layer (REST Handlers, gRPC, Middleware)  
-         └── rest/  
-               └── user_handler.go   // Orchestrates calls between domain services  
-
 /myapp
 ├── cmd/
 │    ├── server/
@@ -82,9 +62,9 @@ Entry points for all runnable binaries. Each subdirectory maps to one compiled b
 | File or Dir | Purpose |
 |-------------|---------|
 | cmd/server/main.go | App entry point. Reads config, initializes infra, wires all dependencies, starts HTTP server. |
-| cmd/worker/main.go | Optional — separate binary for background jobs or queue consumers. Shares the same internal/ packages. |
+| cmd/worker/main.go | Optional, separate binary for background jobs or queue consumers. Shares the same internal/ packages. |
 
-***main.go*** should be pure wiring — no business logic:
+### main.go should be pure wiring — no business logic:
 ```go
 gofunc main() {
     cfg := config.Load()
@@ -101,7 +81,7 @@ gofunc main() {
 }
 ```
 
-**internal/<domain>/ (e.g. user/, order/)**
+### internal/{domain}/ (e.g. user/, order/)
 One directory per domain. Each domain is fully self-contained with its own models, business logic, interfaces, and repository implementation.
 
 | File | Purpose |
@@ -113,7 +93,7 @@ One directory per domain. Each domain is fully self-contained with its own model
 | repository/pg.go | Postgres implementation of UserRepository. Translates between domain model and db model. |
 | repository/pg_model.go | DB-layer structs with `db:""` tags. Also contains toDomain() / fromDomain() mapping functions. |
 
-Example ports.go:
+**Example ports.go:**
 ```go
 // internal/user/ports.go
 type Repository interface {
@@ -126,7 +106,7 @@ type EmailSender interface {
 }
 ```
 
-Example repository/pg_model.go:
+**Example repository/pg_model.go:**
 ```go
 // internal/user/repository/pg_model.go
 type pgUser struct {
@@ -144,21 +124,21 @@ func fromDomain(u *user.User) pgUser {
 }
 ```
 
-**internal/usecase/**
+### internal/usecase/  
 Orchestration layer for multi-domain flows that contain real business logic. Prevents business rules from leaking into the transport (handler) layer.  
-Each subdirectory is one use case — a user-facing operation that spans multiple domains.  
+Each subdirectory is one use case, a user-facing operation that spans multiple domains.  
 | File | Purpose |
 |------|---------|
 | usecase/checkout/service.go | Orchestrates user, order, payment domains for the checkout flow. Business decisions live here. | 
-| usecase/checkout/ports.go | Interfaces for each domain the usecase depends on (UserProvider, OrderCreator, PaymentCharger). Injected via constructor. |
+| usecase/checkout/ports.go | Interfaces for each domain the usecase depends on ```(UserProvider, OrderCreator, PaymentCharger)```. Injected via constructor. |
 
 
-**internal/shared/**
+### internal/shared/  
 Shared primitive types with no business logic, imported by multiple domains. Keep this small and stable.  
-✅ Good candidates: Money, Pagination, TimeRange, Address, AuditInfo
-❌ Unsuitable candidates: User, Order — these are domain-owned, not shared primitives.
+✅ Good candidates: Money, Pagination, TimeRange, Address, AuditInfo  
+❌ Unsuitable candidates: User, Order, these are domain-owned, not shared primitives.  
 
-**internal/infra/**
+### internal/infra/  
 App-specific infrastructure initialization. Reads your config, knows your environment, creates concrete clients.  
 Lives in internal/ (not pkg/) because it contains app-specific configuration knowledge.
 
@@ -173,26 +153,26 @@ func NewMySQLPool(cfg Config) *sqlx.DB {
 }
 ```
 
-**pkg/**
+### pkg/
 Generic, reusable utilities with zero business context. Safe for any project to import.  
-✅ Good candidates: logger wrapper, crypto helpers, HTTP client builder, pagination helpers
-❌ Bad candidates: anything that imports your domain types or reads your app config
+✅ Good candidates: logger wrapper, crypto helpers, HTTP client builder, pagination helpers  
+❌ Bad candidates: anything that imports your **domain types or reads your app config**  
 
-**api/**
+### api/
 Transport layer. Handles HTTP/gRPC concerns: parsing requests, calling services, writing responses. Should contain no business logic.  
 | File | Purpose |  
 |------|---------|  
 | rest/user_handler.go | HTTP handler for single-domain user operations. Calls **user.Service** directly. |  
-| rest/checkout_handler.go | HTTP handler for the checkout flow. Calls **usecase/checkout.Service**, not individual domain services. |
+| rest/checkout_handler.go | HTTP handler for the checkout flow. Calls **usecase/checkout.Service**, not individual domain services. |  
 
 ## Key Design Rules
 **1. Avoiding Circular Dependencies**
 To prevent the common ```import cycle not allowed``` error:
-**A. Shared Types:** All structs used by more than one package live in ```internal/shared```.
-**B. Orchestration:** If a feature requires calling both ```user``` and ```order``` services, that logic lives in the ```internal/usecase``` for a multi-domains flow orchestrator.
+**A. Shared Types:** All structs used by more than one package live in ```internal/shared```.  
+**B. Orchestration:** If a feature requires calling both ```user``` and ```order``` services, that logic lives in the ```internal/usecase``` for a multi-domains flow orchestrator.  
 
 **2. Mocking and Testability**
-Testability is achieved through ```Constructor Injection```. Each service in ```internal/``` defines its dependencies as interfaces in ```ports.go```. 
+Testability is achieved through ```Constructor Injection```. Each service in ```internal/``` defines its dependencies as interfaces in ```ports.go```.  
 During testing, you simply pass a mock implementation into the service constructor.
 
 **3. The ```internal/``` Boundary**
