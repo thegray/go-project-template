@@ -56,8 +56,8 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
           └── routes.go
 ```
 ## Directory Explanations
-**cmd/**
-Entry points for all runnable binaries. Each subdirectory maps to one compiled binary.
+**cmd/**  
+Entry points for all runnable binaries. Each subdirectory maps to one compiled binary.  
 
 | File or Dir | Purpose |
 |-------------|---------|
@@ -93,7 +93,7 @@ One directory per domain. Each domain is fully self-contained with its own model
 | repository/pg.go | Postgres implementation of UserRepository. Translates between domain model and db model. |
 | repository/pg_model.go | DB-layer structs with `db:""` tags. Also contains toDomain() / fromDomain() mapping functions. |
 
-**Example ports.go:**
+**Example ports.go:**  
 ```go
 // internal/user/ports.go
 type Repository interface {
@@ -106,7 +106,7 @@ type EmailSender interface {
 }
 ```
 
-**Example repository/pg_model.go:**
+**Example repository/pg_model.go:**  
 ```go
 // internal/user/repository/pg_model.go
 type pgUser struct {
@@ -166,18 +166,18 @@ Transport layer. Handles HTTP/gRPC concerns: parsing requests, calling services,
 | rest/checkout_handler.go | HTTP handler for the checkout flow. Calls **usecase/checkout.Service**, not individual domain services. |  
 
 ## Key Design Rules
-**1. Avoiding Circular Dependencies**
-To prevent the common ```import cycle not allowed``` error:
+**1. Avoiding Circular Dependencies**  
+To prevent the common ```import cycle not allowed``` error:  
 **A. Shared Types:** All structs used by more than one package live in ```internal/shared```.  
 **B. Orchestration:** If a feature requires calling both ```user``` and ```order``` services, that logic lives in the ```internal/usecase``` for a multi-domains flow orchestrator.  
 
-**2. Mocking and Testability**
+**2. Mocking and Testability**  
 Testability is achieved through ```Constructor Injection```. Each service in ```internal/``` defines its dependencies as interfaces in ```ports.go```.  
-During testing, you simply pass a mock implementation into the service constructor.
+During testing, you simply pass a mock implementation into the service constructor.  
 
-**3. The ```internal/``` Boundary**
+**3. The ```internal/``` Boundary**  
 Code inside ```internal/``` cannot be imported by any code outside this project. 
-This ensures your core business logic remains private and cannot be "leaked" into external tools or libraries.
+This ensures your core business logic remains private and cannot be "leaked" into external tools or libraries.  
 
 ## Orchestration Strategy
 ### Orchestrate at Usecase Layer - Recommended
@@ -289,7 +289,7 @@ The most common mistake is having two domains import each other. This is always 
 | Shared domain types in ```internal/shared/``` | ```shared/``` becomes a dumping ground | Only truly generic types: ```Money, Pagination, TimeRange``` |
 
 ## The Reference Pattern
-When domain A needs to reference domain B's entity, use an **ID string** instead of embedding the full type:
+When domain A needs to reference domain B's entity, use an **ID string** instead of embedding the full type:  
 ```go
 // internal/order/model.go
 type Order struct {
@@ -299,7 +299,7 @@ type Order struct {
     Total  int
 }
 ```
-If ```order``` service genuinely needs user data, it declares a minimal interface in its own ```ports.go``` and receives a concrete implementation via dependency injection, never by importing the ```user``` package directly.
+If ```order``` service genuinely needs user data, it declares a minimal interface in its own ```ports.go``` and receives a concrete implementation via dependency injection, never by importing the ```user``` package directly.  
 
 ## Quick Decision Guide
 | Question | Answer |
