@@ -56,7 +56,7 @@ This template implements a **Package-Oriented Architecture**. It prioritizes Go 
           └── routes.go
 ```
 ## Directory Explanations
-**cmd/**  
+### cmd/
 Entry points for all runnable binaries. Each subdirectory maps to one compiled binary.  
 
 | File or Dir | Purpose |
@@ -64,7 +64,7 @@ Entry points for all runnable binaries. Each subdirectory maps to one compiled b
 | cmd/server/main.go | App entry point. Reads config, initializes infra, wires all dependencies, starts HTTP server. |
 | cmd/worker/main.go | Optional, separate binary for background jobs or queue consumers. Shares the same internal/ packages. |
 
-### main.go should be pure wiring — no business logic:
+### main.go is pure wiring, no business logic:
 ```go
 gofunc main() {
     cfg := config.Load()
