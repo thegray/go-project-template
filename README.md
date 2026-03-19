@@ -227,7 +227,7 @@ func (s *Service) Checkout(ctx context.Context, input Input) (Result, error) {
 
     // Business logic lives here, not in the handler
     discount := 0
-    if user.MembershipTier == "premium" {
+    if strings.Contains(strings.ToLower(user.Email), "vip") {
         discount = 10
     }
 
@@ -300,6 +300,45 @@ type Order struct {
 }
 ```
 If ```order``` service genuinely needs user data, it declares a minimal interface in its own ```ports.go``` and receives a concrete implementation via dependency injection, never by importing the ```user``` package directly.  
+
+## Example Runtime
+This template now includes:
+- `Gin` HTTP server
+- `Postgres` persistence
+- `user` login and profile lookup
+- `order` CRUD
+- `checkout` orchestration across user and order
+- `Dockerfile` and `docker-compose.yml`
+
+### Environment
+The app reads config from `.env` or process environment variables.
+
+Important variables:
+- `SERVER_HOST`
+- `SERVER_PORT`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_SSLMODE`
+
+### Demo User
+On first boot, the server seeds a demo user if it does not exist.
+
+- Email: `vip@example.com`
+- Password: `password123`
+- Checkout discount: user email contains `vip`
+
+### API Endpoints
+- `POST /api/v1/users/login`
+- `GET /api/v1/users/:id`
+- `POST /api/v1/orders`
+- `GET /api/v1/orders`
+- `GET /api/v1/orders/:id`
+- `PUT /api/v1/orders/:id`
+- `DELETE /api/v1/orders/:id`
+- `POST /api/v1/checkout`
 
 ## Quick Decision Guide
 | Question | Answer |
