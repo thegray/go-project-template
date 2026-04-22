@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"auth-service/internal/user"
+	"project-template/internal/user"
 )
 
 type pgUser struct {

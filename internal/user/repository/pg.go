@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"auth-service/internal/user"
-	applogger "auth-service/pkg/logger"
+	"project-template/internal/user"
+	applogger "project-template/pkg/logger"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
