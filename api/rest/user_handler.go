@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"project-template/internal/user"
-	applogger "project-template/pkg/logger"
+	"auth-service/internal/user"
+	applogger "auth-service/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

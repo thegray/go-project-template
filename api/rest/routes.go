@@ -3,10 +3,10 @@ package rest
 import (
 	"net/http"
 
-	"project-template/internal/order"
-	"project-template/internal/usecase/checkout"
-	"project-template/internal/user"
-	applogger "project-template/pkg/logger"
+	"auth-service/internal/order"
+	"auth-service/internal/usecase/checkout"
+	"auth-service/internal/user"
+	applogger "auth-service/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
